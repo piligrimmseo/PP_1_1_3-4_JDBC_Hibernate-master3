@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserDaoJDBCImpl implements UserDao {
-    String tableName = "user";
+    private String tableName = "user";
 
     public UserDaoJDBCImpl() {
     }
