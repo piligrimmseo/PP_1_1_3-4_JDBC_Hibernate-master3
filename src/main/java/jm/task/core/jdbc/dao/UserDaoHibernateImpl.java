@@ -13,10 +13,6 @@ public class UserDaoHibernateImpl implements UserDao {
 
     private String table = "user_table";
 
-    public String getTable() {
-        return table;
-    }
-
     public UserDaoHibernateImpl() {
 
     }
@@ -25,7 +21,7 @@ public class UserDaoHibernateImpl implements UserDao {
     public void createUsersTable() {
         try (Session session = getSessionFactory().openSession()) {
             session.beginTransaction();
-            session.createSQLQuery("CREATE TABLE IF NOT EXISTS users." + getTable() + "(\n" +
+            session.createSQLQuery("CREATE TABLE IF NOT EXISTS " + table + "(\n" +
                     "  id BIGINT NOT NULL AUTO_INCREMENT,\n" +
                     "  name VARCHAR(45) CHARACTER SET 'utf8' COLLATE 'utf8_general_ci' NULL,\n" +
                     "  last_name VARCHAR(45) CHARACTER SET 'utf8' COLLATE 'utf8_general_ci' NULL,\n" +
@@ -46,7 +42,7 @@ public class UserDaoHibernateImpl implements UserDao {
     public void dropUsersTable() {
         try (Session session = getSessionFactory().openSession()) {
             session.beginTransaction();
-            session.createSQLQuery("DROP TABLE IF EXISTS " + getTable()).executeUpdate();
+            session.createSQLQuery("DROP TABLE IF EXISTS " + table).executeUpdate();
             session.getTransaction().commit();
         } catch (Exception e) {
             if (getSessionFactory().getCurrentSession().getTransaction().isActive()) {
@@ -116,7 +112,7 @@ public class UserDaoHibernateImpl implements UserDao {
     public void cleanUsersTable() {
         try (Session session = getSessionFactory().openSession()) {
             session.beginTransaction();
-            session.createSQLQuery("DELETE FROM " + getTable()).executeUpdate();
+            session.createSQLQuery("DELETE FROM " + table).executeUpdate();
             session.getTransaction().commit();
         } catch (Exception e) {
             if (getSessionFactory().getCurrentSession().getTransaction().isActive()) {
