@@ -3,13 +3,14 @@ package jm.task.core.jdbc;
 import jm.task.core.jdbc.dao.UserDao;
 import jm.task.core.jdbc.dao.UserDaoHibernateImpl;
 import jm.task.core.jdbc.model.User;
+import jm.task.core.jdbc.util.Util;
+
 import java.sql.SQLException;
 
 
 public class Main {
 
     public static void main(String[] args) throws SQLException {
-
         UserDao userDao = new UserDaoHibernateImpl();
 
         User user1 = new User("Ivan", "Petrov", (byte) 30);
@@ -27,8 +28,6 @@ public class Main {
         userDao.getAllUsers();
         userDao.cleanUsersTable();
         userDao.dropUsersTable();
-
-
+        Util.shutdown();
     }
-
 }

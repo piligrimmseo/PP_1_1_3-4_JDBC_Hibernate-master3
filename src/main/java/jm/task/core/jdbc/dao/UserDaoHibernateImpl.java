@@ -10,71 +10,120 @@ import static jm.task.core.jdbc.util.Util.getSessionFactory;
 
 
 public class UserDaoHibernateImpl implements UserDao {
+
+    private String table = "user_table";
+
+    public String getTable() {
+        return table;
+    }
+
     public UserDaoHibernateImpl() {
 
     }
 
-
     @Override
     public void createUsersTable() {
-        Session session = getSessionFactory().openSession();
-        session.beginTransaction();
-        session.createSQLQuery("CREATE TABLE IF NOT EXISTS users.user_table (\n" +
-                "  id BIGINT NOT NULL AUTO_INCREMENT,\n" +
-                "  name VARCHAR(45) CHARACTER SET 'utf8' COLLATE 'utf8_general_ci' NULL,\n" +
-                "  last_name VARCHAR(45) CHARACTER SET 'utf8' COLLATE 'utf8_general_ci' NULL,\n" +
-                "  age TINYINT NULL,\n" +
-                "  PRIMARY KEY (id));\n").executeUpdate();
-        session.getTransaction().commit();
+        try (Session session = getSessionFactory().openSession()) {
+            session.beginTransaction();
+            session.createSQLQuery("CREATE TABLE IF NOT EXISTS users." + getTable() + "(\n" +
+                    "  id BIGINT NOT NULL AUTO_INCREMENT,\n" +
+                    "  name VARCHAR(45) CHARACTER SET 'utf8' COLLATE 'utf8_general_ci' NULL,\n" +
+                    "  last_name VARCHAR(45) CHARACTER SET 'utf8' COLLATE 'utf8_general_ci' NULL,\n" +
+                    "  age TINYINT NULL,\n" +
+                    "  PRIMARY KEY (id));\n").executeUpdate();
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            if (getSessionFactory().getCurrentSession().getTransaction().isActive()) {
+                getSessionFactory().getCurrentSession().getTransaction().rollback();
+            }
+            e.printStackTrace();
+            throw new RuntimeException("Ошибка создания базы данных", e);
+        }
     }
+
 
     @Override
     public void dropUsersTable() {
-        Session session = getSessionFactory().openSession();
-        session.beginTransaction();
-        session.createSQLQuery("DROP TABLE IF EXISTS user_table").executeUpdate();
-        session.getTransaction().commit();
+        try (Session session = getSessionFactory().openSession()) {
+            session.beginTransaction();
+            session.createSQLQuery("DROP TABLE IF EXISTS " + getTable()).executeUpdate();
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            if (getSessionFactory().getCurrentSession().getTransaction().isActive()) {
+                getSessionFactory().getCurrentSession().getTransaction().rollback();
+            }
+            e.printStackTrace();
+            throw new RuntimeException("Ошибка удаления базы данных", e);
+        }
     }
 
     @Override
     public void saveUser(String name, String lastName, byte age) {
-        User newUser = new User(name, lastName, (byte) age);
-        Session session = getSessionFactory().openSession();
-        session.beginTransaction();
-        session.save(newUser);
-        session.getTransaction().commit();
-        System.out.println("User с именем – " + name + " добавлен в базу данных");
+        try (Session session = getSessionFactory().openSession()) {
+            session.beginTransaction();
+            User newUser = new User(name, lastName, (byte) age);
+            session.save(newUser);
+            session.getTransaction().commit();
+            System.out.println("User с именем – " + name + " добавлен в базу данных");
+        } catch (Exception e) {
+            if (getSessionFactory().getCurrentSession().getTransaction().isActive()) {
+                getSessionFactory().getCurrentSession().getTransaction().rollback();
+            }
+            e.printStackTrace();
+            throw new RuntimeException("Ошибка сохранения пользователя", e);
+        }
     }
 
     @Override
     public void removeUserById(long id) {
-        Session session = getSessionFactory().openSession();
-        session.beginTransaction();
-        User user = session.get(User.class, id);
-        if (user == null) {
-            System.out.println("Запись с ID " + id + " не найдена в БД");
-        } else {
-            session.delete(user);
+        try (Session session = getSessionFactory().openSession()) {
+            session.beginTransaction();
+            User user = session.get(User.class, id);
+            if (user == null) {
+                System.out.println("Запись с ID " + id + " не найдена в БД");
+            } else {
+                session.delete(user);
+            }
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            if (getSessionFactory().getCurrentSession().getTransaction().isActive()) {
+                getSessionFactory().getCurrentSession().getTransaction().rollback();
+            }
+            e.printStackTrace();
+            throw new RuntimeException("Ошибка удаления пользователя по ID", e);
         }
-        session.getTransaction().commit();
     }
 
     @Override
     public List<User> getAllUsers() {
         List<User> userList = new ArrayList<>();
-        Session session = getSessionFactory().openSession();
-        session.beginTransaction();
-        userList = session.createQuery("from User").getResultList();
-        session.getTransaction().commit();
-        System.out.println(userList);
+        try (Session session = getSessionFactory().openSession()) {
+            session.beginTransaction();
+            userList = session.createQuery("from User").getResultList();
+            session.getTransaction().commit();
+            System.out.println(userList);
+        } catch (Exception e) {
+            if (getSessionFactory().getCurrentSession().getTransaction().isActive()) {
+                getSessionFactory().getCurrentSession().getTransaction().rollback();
+            }
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
         return userList;
     }
 
     @Override
     public void cleanUsersTable() {
-        Session session = getSessionFactory().openSession();
-        session.beginTransaction();
-        session.createSQLQuery("DELETE FROM user_table").executeUpdate();
-        session.getTransaction().commit();
+        try (Session session = getSessionFactory().openSession()) {
+            session.beginTransaction();
+            session.createSQLQuery("DELETE FROM " + getTable()).executeUpdate();
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            if (getSessionFactory().getCurrentSession().getTransaction().isActive()) {
+                getSessionFactory().getCurrentSession().getTransaction().rollback();
+            }
+            e.printStackTrace();
+            throw new RuntimeException("Ошибка очистки таблицы", e);
+        }
     }
 }

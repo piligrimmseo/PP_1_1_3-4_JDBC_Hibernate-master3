@@ -7,19 +7,18 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
 import org.hibernate.service.ServiceRegistry;
 
-import javax.sound.midi.Soundbank;
-import java.util.Properties;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 
 
 public class Util {
-    // JDBS
     private static final String URL = "jdbc:mysql://localhost:3306/users";
     private static final String USERNAME = "root";
     private static final String PASSWORD = "root";
+
+    private static SessionFactory sessionFactory;
 
     public static Connection getConnection() {
         try {
@@ -30,15 +29,11 @@ public class Util {
         return null;
     }
 
-    // Hibernate
-
-    private static SessionFactory sessionFactory;
     public static SessionFactory getSessionFactory() {
         if (sessionFactory == null) {
             try {
                 Configuration configuration = new Configuration();
 
-                // Hibernate settings equivalent to hibernate.cfg.xml's properties
                 Properties settings = new Properties();
                 settings.put(Environment.DRIVER, "com.mysql.cj.jdbc.Driver");
                 settings.put(Environment.URL, "jdbc:mysql://localhost:3306/users");
@@ -61,5 +56,9 @@ public class Util {
             }
         }
         return sessionFactory;
+    }
+
+    public static void shutdown() {
+        getSessionFactory().close();
     }
 }
